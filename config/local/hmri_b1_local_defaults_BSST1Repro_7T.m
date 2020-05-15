@@ -1,4 +1,4 @@
-function hmri_b1_standard_defaults
+function hmri_b1_local_defaults_BSST1Repro_7T
 % Sets the defaults for B1 bias correction, part of the hMRI toolbox.
 %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 % DON'T MODIFY THIS FILE, IT CONTAINS B1 PROCESSING DEFAULTS PARAMETERS.
@@ -73,24 +73,24 @@ hmri_def.b1map.i3D_EPI.b1avail   = true;
 hmri_def.b1map.i3D_EPI.procreq = true; 
 hmri_def.b1map.i3D_EPI.deffnam  = {fullfile(fileparts(mfilename('fullpath')),'config','hmri_b1_standard_defaults.m')};
 % b0&b1-processing
-hmri_def.b1map.i3D_EPI.b1proc.T1 = 1192; % ms, strictly valid only at 3T
+hmri_def.b1map.i3D_EPI.b1proc.T1 = 1532; % ms, for 7T
 hmri_def.b1map.i3D_EPI.b1proc.eps = 0.0001;
 hmri_def.b1map.i3D_EPI.b1proc.Nonominalvalues = 5; 
-hmri_def.b1map.i3D_EPI.b1proc.HZTHRESH = 110;
-hmri_def.b1map.i3D_EPI.b1proc.SDTHRESH = 5;
+hmri_def.b1map.i3D_EPI.b1proc.HZTHRESH = 400; %7T
+hmri_def.b1map.i3D_EPI.b1proc.SDTHRESH = 15; %7T
 hmri_def.b1map.i3D_EPI.b1proc.ERODEB1 = 1;
 hmri_def.b1map.i3D_EPI.b1proc.PADB1 = 3 ;
 hmri_def.b1map.i3D_EPI.b1proc.B1FWHM = 0; % For smoothing. FWHM in mm - i.e. it is divided by voxel resolution to get FWHM in voxels
 hmri_def.b1map.i3D_EPI.b1proc.match_vdm = 1;
-hmri_def.b1map.i3D_EPI.b1proc.b0maskbrain = 1;
+hmri_def.b1map.i3D_EPI.b1proc.b0maskbrain = 0; % 7T
 % b1-acquisition
-hmri_def.b1map.i3D_EPI.b1acq.beta = 115:-5:65;
-hmri_def.b1map.i3D_EPI.b1acq.TM = 33.8; %31.2 NC Change
+hmri_def.b1map.i3D_EPI.b1acq.beta = 135:-5:65; % 7T
+hmri_def.b1map.i3D_EPI.b1acq.TM = 35.05; %7T
 hmri_def.b1map.i3D_EPI.b1acq.tert = 540e-3*24; % EchoSpacing * numberPElines
 hmri_def.b1map.i3D_EPI.b1acq.blipDIR = 1;
 % b0-acquisition
-hmri_def.b1map.i3D_EPI.b0acq.shortTE = 10; % ms
-hmri_def.b1map.i3D_EPI.b0acq.longTE = 12.46; % ms
+hmri_def.b1map.i3D_EPI.b0acq.shortTE = 4.08; % ms
+hmri_def.b1map.i3D_EPI.b0acq.longTE = 5.1; % ms
 hmri_def.b1map.i3D_EPI.b0acq.iformat = 'PM'; % ms
 
 % 'tfl_b1_map'

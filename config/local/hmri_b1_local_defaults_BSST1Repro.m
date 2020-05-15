@@ -1,4 +1,4 @@
-function hmri_b1_standard_defaults
+function hmri_b1_local_defaults_BSST1Repro
 % Sets the defaults for B1 bias correction, part of the hMRI toolbox.
 %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 % DON'T MODIFY THIS FILE, IT CONTAINS B1 PROCESSING DEFAULTS PARAMETERS.
@@ -75,7 +75,7 @@ hmri_def.b1map.i3D_EPI.deffnam  = {fullfile(fileparts(mfilename('fullpath')),'co
 % b0&b1-processing
 hmri_def.b1map.i3D_EPI.b1proc.T1 = 1192; % ms, strictly valid only at 3T
 hmri_def.b1map.i3D_EPI.b1proc.eps = 0.0001;
-hmri_def.b1map.i3D_EPI.b1proc.Nonominalvalues = 5; 
+hmri_def.b1map.i3D_EPI.b1proc.Nonominalvalues = 5;
 hmri_def.b1map.i3D_EPI.b1proc.HZTHRESH = 110;
 hmri_def.b1map.i3D_EPI.b1proc.SDTHRESH = 5;
 hmri_def.b1map.i3D_EPI.b1proc.ERODEB1 = 1;

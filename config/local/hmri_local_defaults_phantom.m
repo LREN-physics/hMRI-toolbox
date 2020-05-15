@@ -1,46 +1,48 @@
-function hmri_defaults
-% Sets the defaults parameters which are used by the hMRI toolbox.
-%!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-% DON'T MODIFY THIS FILE, IT CONTAINS THE REFERENCE DEFAULTS PARAMETERS.
-% Please refer to hMRI-Toolbox\config\local\hmri_local_defaults.m to
-% customise defaults parameters.  
-%!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+function hmri_local_defaults
+% PURPOSE
+% To set user-defined (site- or protocol-specific) defaults parameters
+% which are used by the hMRI toolbox. Customized processing parameters can
+% be defined, overwriting defaults from hmri_defaults. Acquisition
+% protocols can be specified here as a fallback solution when no metadata
+% are available. Note that the use of metadata is strongly recommended. 
 %
-% FORMAT hmri_defaults
-%__________________________________________________________________________
+% RECOMMENDATIONS
+% Parameters defined in this file are identical, initially, to the ones
+% defined in hmri_defaults.m. It is recommended, when modifying this file,
+% to remove all unchanged entries and save the file with a meaningful name.
+% This will help you identifying the appropriate defaults to be used for
+% each protocol, and will improve the readability of the file by pointing
+% to the modified parameters only.
 %
-% THIS FILE SHOULD NOT BE MODIFIED. 
-% To customize the hMRI-Toolbox defaults parameters so they match your own
-% site- or protocol-specific setup, please refer to the defaults files in
-% hMRI-Toolbox\config\local. In particular, use "hmri_local_defaults.m".
-% Make a copy with meaningful name, modify as desired and select as general
-% defaults file in the "Configure toolbox" branch of the hMRI-Toolbox.
+% WARNING
+% Modification of the defaults parameters may impair the integrity of the
+% toolbox, leading to unexpected behaviour. ONLY RECOMMENDED FOR ADVANCED
+% USERS - i.e. who have a good knowledge of the underlying algorithms and
+% implementation. The SAME SET OF DEFAULT PARAMETERS must be used to
+% process uniformly all the data from a given study. 
 %
-% The structure and content of this file are largely inspired by the
-% equivalent file in SPM.
+% HOW DOES IT WORK?
+% The modified defaults file can be selected using the "Configure toolbox"
+% branch of the hMRI-Toolbox. For customization of B1 processing
+% parameters, type "help hmri_b1_standard_defaults.m". 
 %
 % DOCUMENTATION
 % A brief description of each parameter is provided together with
 % guidelines and recommendations to modify these parameters. With few
 % exceptions, parameters should ONLY be MODIFIED and customized BY ADVANCED
 % USERS, having a good knowledge of the underlying algorithms and
-% implementation. Please refer to the documentation in the github WIKI for
-% more details.  
+% implementation. 
+% Please refer to the documentation in the github WIKI for more details. 
 %__________________________________________________________________________
-% Copyright (C) 2013 Wellcome Trust Centre for Neuroimaging
-
-% Written by C. Phillips, 2013.
+% Written by E. Balteau, 2017.
 % Cyclotron Research Centre, University of Liege, Belgium
 
 % Global hmri_def variable used across the whole toolbox
 global hmri_def
 
-% Specifying the research centre - to be customized in the local
-% configuration file (config/local/hmri_local_defaults.m). Not mandatory.
-hmri_def.centre = 'centre' ; 
-
-% Defaults customised defaults file location
-hmri_def.local_defaults = {fullfile(fileparts(mfilename('fullpath')),'local','hmri_local_defaults.m')};
+% Specify the research centre & scanner. Not mandatory.
+hmri_def.centre = 'centre' ; % 'fil', 'lren', 'crc', 'sciz', 'cbs', ...
+hmri_def.scanner = 'scanner name' ; % e.g. 'prisma', 'allegra', 'terra', 'achieva', ...
 
 %==========================================================================
 % Common processing parameters 
@@ -64,7 +66,7 @@ hmri_def.json = struct('extended',false,'separate',true,'anonym','none',...
 % provides a series of tissue probability maps. These TPMs could be
 % replaced by other TPMs, to better match the population studied. 
 % ADVANCED USER ONLY.
-hmri_def.TPM = fullfile(fileparts(fileparts(mfilename('fullpath'))),'etpm','eTPM.nii');
+hmri_def.TPM = fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))),'etpm','eTPM.nii');
 % default template for auto-reorientation. The template can be selected
 % within the Auto-reorient module. The following is the default suggested
 % for T1w images. Please refer to the Auto-reorient documentation for an
@@ -132,7 +134,7 @@ hmri_def.segment.warp.write = [0 0];
 %--------------------------------------------------------------------------
 % The coregistration step can be disabled using the following flag (not
 % recommended). ADVANCED USER ONLY. 
-hmri_def.coreg2PDw = 1; 
+hmri_def.coreg2PDw = 0; % NC change necessary for slab selection 
 
 %--------------------------------------------------------------------------
 % Ordinary Least Squares & fit at TE=0
@@ -141,20 +143,6 @@ hmri_def.coreg2PDw = 1;
 % to calculate R2* map from all available contrasts. 
 % ADVANCED USER ONLY.
 hmri_def.R2sOLS = 1; 
-
-% Minimum number of echoes to calculate R2s map. Strictly speaking, the
-% minimum is 2. For a robust estimation, the minimum number of echoes
-% required depends on many factors, amongst which: 
-% - SNR/resolution
-% - distribution/spacing between TEs: note that early echoes are more
-%   affected by the specific contrast, violating the assumption of a common
-%   decay between contrasts. 
-% - number of contrasts available (fewer echoes per contrast required for 3
-%   (PDw, T1w, MTw) contrasts as compared to 2 or even 1)
-% To be on the safe side, a minimum of 6 echoes is recommended (ESTATICS
-% paper). Further studies are required to come up with more detailed and
-% informed guidelines. Use fewer echoes at your own risk...! 
-hmri_def.neco4R2sfit = 4;
 
 % Define a coherent interpolation factor used all through the map creation
 % process. Default is 3, but if you want to keep SNR and resolution as far
@@ -169,22 +157,14 @@ hmri_def.interp = 3;
 hmri_def.fullOLS = true;
 
 %--------------------------------------------------------------------------
-% Usage of UNICORT-derived B1 maps for PD and/or MT maps calculation
-% ADVANCED USER ONLY.
-% WARNING: this method has not been validated for PD and MT calculation!
-%--------------------------------------------------------------------------
-hmri_def.UNICORT.PD = false;
-hmri_def.UNICORT.MT = false;
-
-%--------------------------------------------------------------------------
 % PD maps processing parameters
 % ADVANCED USER ONLY.
 %--------------------------------------------------------------------------
 hmri_def.PDproc.calibr    = 1;   % Calibration of the PD map (if PDw, T1w, 
     % B1map available and RF sensitivity bias correction applied somehow)
     % based on PD(WM) = 69% [Tofts 2003]. 
-hmri_def.PDproc.WBMaskTh = 0.1;  % Threshold for calculation of whole-brain mask from TPMs
-hmri_def.PDproc.WMMaskTh = 0.95; % Threshold for calculation of white-matter mask from TPMs
+hmri_def.PDproc.WBMaskTh = 0%0.1;  % Threshold for calculation of whole-brain mask from TPMs %% Change
+hmri_def.PDproc.WMMaskTh = 0%0.95; % Threshold for calculation of white-matter mask from TPMs %% change
 hmri_def.PDproc.biasreg  = 10^(-5);
 hmri_def.PDproc.biasfwhm = 50;
 hmri_def.PDproc.nr_echoes_forA = 6; % NOTE: in order to minimize R2* bias 
@@ -197,7 +177,7 @@ hmri_def.PDproc.nr_echoes_forA = 6; % NOTE: in order to minimize R2* bias
 hmri_def.PDproc.T2scorr = 1; % to correct A map for T2*-weighting bias 
     % before PD map calculation. The correction is not required when
     % "fullOLS = true" (TE=0 fit) and will be automatically disabled.
-
+    
 %--------------------------------------------------------------------------
 % RF sensitivity bias correction: kernel for sensitivity map smoothing.
 % ADVANCED USER ONLY.
@@ -208,7 +188,7 @@ hmri_def.RFsens.smooth_kernel = 12;
 % quantitative maps: quality evaluation and realignment to MNI
 %--------------------------------------------------------------------------
 % creates a matlab structure containing markers of data quality
-hmri_def.qMRI_maps.QA          = 0; % 1 NC Change 
+hmri_def.qMRI_maps.QA          = 0; %% Change NC 
 % realigns qMRI maps to MNI: the following parameter corresponds to the
 % realignment implemented as part of the map calculation (see
 % hmri_create_MTProt.m). Left here for backward compatibility. It is
@@ -229,7 +209,7 @@ hmri_def.qMRI_maps.ACPCrealign = 0;
 % the statistical results.
 % ADVANCED USER ONLY.
 %--------------------------------------------------------------------------
-hmri_def.qMRI_maps_thresh.R1       = 2000; % 1000*[s-1]
+hmri_def.qMRI_maps_thresh.R1       = 10000; % 1000*[s-1] %%NC Change
 hmri_def.qMRI_maps_thresh.A        = 10^5; % [a.u.] based on input images with intensities ranging approx. [0 4096].
 hmri_def.qMRI_maps_thresh.R2s      = 10;   % 1000*[s-1]
 hmri_def.qMRI_maps_thresh.MTR      = 50;
@@ -247,9 +227,9 @@ hmri_def.qMRI_maps_thresh.MT       = 5;    % [p.u.]
 % the toolbox from your data, the following values should be adapted in the
 % local defaults file. 
 % ADVANCED USER ONLY
-hmri_def.MPMacq.TE_mtw = 2.34:2.34:14.04; % [ms]
-hmri_def.MPMacq.TE_t1w = 2.34:2.34:18.72; % [ms]
-hmri_def.MPMacq.TE_pdw = 2.34:2.34:18.72; % [ms]
+hmri_def.MPMacq.TE_mtw = 2.34; % [ms]
+hmri_def.MPMacq.TE_t1w = 2.34; % [ms]
+hmri_def.MPMacq.TE_pdw = 2.34; % [ms]
 hmri_def.MPMacq.TR_mtw = 24.5; % [ms]
 hmri_def.MPMacq.TR_t1w = 24.5; % [ms]
 hmri_def.MPMacq.TR_pdw = 24.5; % [ms]
@@ -319,8 +299,7 @@ hmri_def.MPMacq_set.names{7} = 'v3star protocol';
 hmri_def.MPMacq_set.tags{7}  = 'v3star';
 hmri_def.MPMacq_set.vals{7}  = [25 25 6 21];
 
-% B) Defining the imperfect spoiling correction parameters for the
-% different protocols 
+% B) Defining the RFCorr parameters for the different protocols
 %--------------------------------------------------------------------------
 % Antoine Lutti 15/01/09
 % The following correction parameters are based on 
@@ -329,62 +308,44 @@ hmri_def.MPMacq_set.vals{7}  = [25 25 6 21];
 % Deichmann with the experimental parameters used for the standard MPM
 % protocol and assuming T2 = 64 ms at 3T.
 
-% Given the possible confusion and resulting mistake (imperfect spoiling
-% correction applied to the wrong sequence), when TR and FA values match
-% one of the listed cases below, the option is disabled by default. 
-% When enabling the imperfect spoiling correction, make sure the
-% coefficients retrieved in the list below are definitely calculated for
-% the protocol used!
-hmri_def.imperfectSpoilCorr.enabled = true; % NC Change false
-
 % 1) classic FIL protocol (Weiskopf et al., Neuroimage 2011):
-hmri_def.imperfectSpoilCorr.ClassicFIL.tag = 'Classic FIL protocol';
-hmri_def.imperfectSpoilCorr.ClassicFIL.P2_a = [78.9228195006542,-101.113338489192,47.8783287525126];
-hmri_def.imperfectSpoilCorr.ClassicFIL.P2_b = [-0.147476233142129,0.126487385091045,0.956824374979504];
-hmri_def.imperfectSpoilCorr.ClassicFIL.enabled = hmri_def.imperfectSpoilCorr.enabled;
+hmri_def.rfcorr.ClassicFIL.tag = 'Classic FIL protocol';
+hmri_def.rfcorr.ClassicFIL.P2_a = [78.9228195006542,-101.113338489192,47.8783287525126];
+hmri_def.rfcorr.ClassicFIL.P2_b = [-0.147476233142129,0.126487385091045,0.956824374979504];
+hmri_def.rfcorr.ClassicFIL.RFCorr = true;
 % 2) new FIL/Helms protocol
-hmri_def.imperfectSpoilCorr.NewFILHelms.tag = 'New FIL/Helms protocol';
-hmri_def.imperfectSpoilCorr.NewFILHelms.P2_a = [93.455034845930480,-120.5752858196904,55.911077913369060];
-hmri_def.imperfectSpoilCorr.NewFILHelms.P2_b = [-0.167301931434861,0.113507432776106,0.961765216743606];
-hmri_def.imperfectSpoilCorr.NewFILHelms.enabled = hmri_def.imperfectSpoilCorr.enabled;
+hmri_def.rfcorr.NewFILHelms.tag = 'New FIL/Helms protocol';
+hmri_def.rfcorr.NewFILHelms.P2_a = [93.455034845930480,-120.5752858196904,55.911077913369060];
+hmri_def.rfcorr.NewFILHelms.P2_b = [-0.167301931434861,0.113507432776106,0.961765216743606];
+hmri_def.rfcorr.NewFILHelms.RFCorr = true;
 % 3) Siemens product sequence protocol used in Lausanne (G Krueger)
-hmri_def.imperfectSpoilCorr.SiemPrLausGK.tag = 'Siemens product Lausanne (GK) protocol';
-hmri_def.imperfectSpoilCorr.SiemPrLausGK.P2_a = [67.023102027100880,-86.834117103841540,43.815818592349870];
-hmri_def.imperfectSpoilCorr.SiemPrLausGK.P2_b = [-0.130876849571103,0.117721807209409,0.959180058389875];
-hmri_def.imperfectSpoilCorr.SiemPrLausGK.enabled = hmri_def.imperfectSpoilCorr.enabled;
+hmri_def.rfcorr.SiemPrLausGK.tag = 'Siemens product Lausanne (GK) protocol';
+hmri_def.rfcorr.SiemPrLausGK.P2_a = [67.023102027100880,-86.834117103841540,43.815818592349870];
+hmri_def.rfcorr.SiemPrLausGK.P2_b = [-0.130876849571103,0.117721807209409,0.959180058389875];
+hmri_def.rfcorr.SiemPrLausGK.RFCorr = true;
 % 4) High-res (0.8mm) FIL protocol:
-hmri_def.imperfectSpoilCorr.HResFIL.tag = 'High-res FIL protocol';
-hmri_def.imperfectSpoilCorr.HResFIL.P2_a = [1.317257319014170e+02,-1.699833074433892e+02,73.372595677371650];
-hmri_def.imperfectSpoilCorr.HResFIL.P2_b = [-0.218804328507184,0.178745853134922,0.939514554747592];
-hmri_def.imperfectSpoilCorr.HResFIL.enabled = hmri_def.imperfectSpoilCorr.enabled;
+hmri_def.rfcorr.HResFIL.tag = 'High-res FIL protocol';
+hmri_def.rfcorr.HResFIL.P2_a = [1.317257319014170e+02,-1.699833074433892e+02,73.372595677371650];
+hmri_def.rfcorr.HResFIL.P2_b = [-0.218804328507184,0.178745853134922,0.939514554747592];
+hmri_def.rfcorr.HResFIL.RFCorr = true;
 % 5)NEW  High-res (0.8mm) FIL protocol:
-hmri_def.imperfectSpoilCorr.NHResFIL.tag = 'New High-res FIL protocol';
-hmri_def.imperfectSpoilCorr.NHResFIL.P2_a = [88.8623036106612,-114.526218941363,53.8168602253166];
-hmri_def.imperfectSpoilCorr.NHResFIL.P2_b = [-0.132904017579521,0.113959390779008,0.960799295622202];
-hmri_def.imperfectSpoilCorr.NHResFIL.enabled = hmri_def.imperfectSpoilCorr.enabled;
+hmri_def.rfcorr.NHResFIL.tag = 'New High-res FIL protocol';
+hmri_def.rfcorr.NHResFIL.P2_a = [88.8623036106612,-114.526218941363,53.8168602253166];
+hmri_def.rfcorr.NHResFIL.P2_b = [-0.132904017579521,0.113959390779008,0.960799295622202];
+hmri_def.rfcorr.NHResFIL.RFCorr = true;
 % 6)NEW  1mm protocol - seq version v2k:
-hmri_def.imperfectSpoilCorr.v2k.tag = 'v2k protocol';
-hmri_def.imperfectSpoilCorr.v2k.P2_a = [71.2817617982844,-92.2992876164017,45.8278193851731];
-hmri_def.imperfectSpoilCorr.v2k.P2_b = [-0.137859046784839,0.122423212397157,0.957642744668469];
-hmri_def.imperfectSpoilCorr.v2k.enabled = hmri_def.imperfectSpoilCorr.enabled;
+hmri_def.rfcorr.v2k.tag = 'v2k protocol';
+hmri_def.rfcorr.v2k.P2_a = [71.2817617982844,-92.2992876164017,45.8278193851731];
+hmri_def.rfcorr.v2k.P2_b = [-0.137859046784839,0.122423212397157,0.957642744668469];
+hmri_def.rfcorr.v2k.RFCorr = true;
 % 7) 800um protocol - seq version v3* released used by MEG group:
-hmri_def.imperfectSpoilCorr.v3star.tag = 'v3star protocol';
-hmri_def.imperfectSpoilCorr.v3star.P2_a = [57.427573706259864,-79.300742898810441,39.218584751863879];
-hmri_def.imperfectSpoilCorr.v3star.P2_b = [-0.121114060111119,0.121684347499374,0.955987357483519];
-hmri_def.imperfectSpoilCorr.v3star.enabled = hmri_def.imperfectSpoilCorr.enabled;
+hmri_def.rfcorr.v3star.tag = 'v3star protocol';
+hmri_def.rfcorr.v3star.P2_a = [57.427573706259864,-79.300742898810441,39.218584751863879];
+hmri_def.rfcorr.v3star.P2_b = [-0.121114060111119,0.121684347499374,0.955987357483519];
+hmri_def.rfcorr.v3star.RFCorr = true;
 % Unknwon protocol
-hmri_def.imperfectSpoilCorr.Unknown.tag = 'Unknown protocol. No spoiling correction defined.';
-hmri_def.imperfectSpoilCorr.Unknown.enabled = false;
-
-%--------------------------------------------------------------------------
-% B1 mapping processing parameters 
-%--------------------------------------------------------------------------
-% All defaults for B1 map calculation are defined in 
-% hMRI-Toolbox\config\hmri_b1_standard_defaults.m. 
-% See examples of local customization in the hMRI-Toolbox\config\local
-% directory. 
-
-hmri_b1_standard_defaults;
+hmri_def.rfcorr.Unknown.tag = 'Unknown protocol. No spoiling correction defined.';
+hmri_def.rfcorr.Unknown.RFCorr = false;
 
 %==========================================================================
 % Maps processing parameters
