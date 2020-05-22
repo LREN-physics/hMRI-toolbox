@@ -1,6 +1,6 @@
 {
 	"Input": {
-		"outdir": ["C:\\Users\\ncorbin\\Documents\\MATLAB\\hMRI-Toolbox\\EPG_for_hmri_tbx"],
+		"outdir": ["D:\\My Documents\\MATLAB"],
 		"prot_name": "Unit_Test_Protocol",
 		"seq_params": {
 			"FA_deg": [6,21],
