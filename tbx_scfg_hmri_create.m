@@ -132,6 +132,18 @@ b1raw.num      = [2 30];
 % b1raw.val      = {''};
 
 % ---------------------------------------------------------------------
+% B1 input images 
+% ---------------------------------------------------------------------
+b1raw_2         = cfg_files;
+b1raw_2.tag      = 'b1input2';
+b1raw_2.name     = 'B1 input for second flip angle';
+b1raw_2.help     = {'Select B1 input images according to the type of B1 bias correction.'};
+b1raw_2.filter   = 'image';
+b1raw_2.ufilter  = '.*';
+b1raw_2.num      = [2 30];
+% b1raw.val      = {''};
+
+% ---------------------------------------------------------------------
 % B0 input images
 % ---------------------------------------------------------------------
 b0raw          = cfg_files;
@@ -198,6 +210,24 @@ b1_input_preproc.help      = {'Input pre-calculated B1 bias map.'
     'percent units (p.u.) of the nominal flip angle. If this is not the case, ' ...
     'a scaling factor can be introduced (see Scaling factor description for more details).']};
 b1_input_preproc.val       = {b1raw scafac};
+
+
+% ---------------------------------------------------------------------
+% NC === pre-calculated B1 map - including potential rescaling factor
+% ---------------------------------------------------------------------
+scafac2         = cfg_entry;
+scafac2.tag     = 'scafac2';
+scafac2.name    = 'Scaling factor 2';
+scafac2.help    = {'test'};
+scafac2.strtype = 'r';
+scafac2.num     = [1 1];
+scafac2.val     = {1};
+
+b1_input2_preproc           = cfg_branch;
+b1_input2_preproc.tag       = 'pre_processed_B1_FA2';
+b1_input2_preproc.name      = 'pre-processed B1 for second FA';
+b1_input2_preproc.help      = {'test'}
+b1_input2_preproc.val       = {b1raw_2 scafac2};
 
 
 % ---------------------------------------------------------------------
@@ -283,6 +313,17 @@ b1_type.help    = {'Choose the methods for B1 bias correction.'
     }; %#ok<*NBRAK>
 b1_type.values  = {b1_input_3DEPI b1_input_3DAFI b1_input_tfl b1_input_rfmap b1_input_preproc b1_input_UNICORT b1_input_noB1};
 b1_type.val     = {b1_input_3DEPI};
+
+% 
+% %% NC===ADD
+ b1_type_2        = cfg_choice;
+ b1_type_2.name    = 'B1 bias correction';
+ b1_type_2.help    = {'second B1 map for second FA'};
+ b1_type_2.tag    = 'b1_type2';
+ b1_type_2.values  = {b1_input2_preproc};
+ b1_type_2.val     = {b1_input2_preproc};
+ 
+
 
 % ---------------------------------------------------------------------
 % Input images for RF sensitivity - RF sensitivity maps for MTw images
@@ -399,6 +440,8 @@ outdir.help    = {'Select a directory where output files will be written to.'};
 outdir.filter = 'dir';
 outdir.ufilter = '.*';
 outdir.num     = [1 1];
+
+
 % ---------------------------------------------------------------------
 % output Output choice
 % ---------------------------------------------------------------------
@@ -407,7 +450,7 @@ output.tag     = 'output';
 output.name    = 'Output choice';
 output.help    = {['Output directory can be the same as the input ' ...
     'directory for each input file or user selected']};
-output.values  = {indir outdir };
+output.values  = {indir outdir};
 output.val = {indir};
 
 % ---------------------------------------------------------------------
@@ -417,7 +460,7 @@ subj            = cfg_branch;
 subj.tag        = 'subj';
 subj.name       = 'Subject';
 subj.help       = {'Specify a subject for maps calculation.'};
-subj.val        = {output sensitivity b1_type raws popup};
+subj.val        = {output sensitivity b1_type b1_type_2 raws popup };
 
 % ---------------------------------------------------------------------
 % data Data

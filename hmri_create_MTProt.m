@@ -98,6 +98,8 @@ mpm_params = get_mpm_params(jobsubj);
 % P_trans(1,:) = magnitude image (anatomical reference for coregistration)
 % P_trans(2,:) = B1 map (p.u.)
 P_trans = jobsubj.b1_trans_input;
+P2_trans = jobsubj.b1_trans_input2; %NC
+
 
 % index number for each contrast - zero index means no images available
 PDwidx = mpm_params.PDwidx;
@@ -292,6 +294,16 @@ if ~isempty(P_trans)
         coreg_bias_map(Pavg{PDwidx}, P_trans);
     end
     V_trans = spm_vol(P_trans);
+end
+
+if ~isempty(P2_trans)
+    % Load B1 mapping data if available and coregister to PDw
+    % P_trans(1,:) = magnitude image (anatomical reference for coregistration) 
+    % P_trans(2,:) = B1 map (p.u.)
+    if mpm_params.coreg
+        coreg_bias_map(Pavg{PDwidx}, P2_trans);
+    end
+    V2_trans = spm_vol(P2_trans);
 end
 
 % parameters saved for quality assessment
@@ -610,6 +622,13 @@ for p = 1:dm(3)
         f_T = [];
     end
     
+    %%%NC
+    if ~isempty(V2_trans)
+        f_T2 = spm_slice_vol(V2_trans(2,:),V2_trans(2,:).mat\M,dm(1:2),mpm_params.interp)/100; % divide by 100, since p.u. maps
+    else
+        f_T2=f_T;
+    end
+    
     % Standard magnetization transfer ratio (MTR) in percent units [p.u.]
     % only if trpd = trmt and fapd = famt and if PDw and MTw images are
     % available
@@ -632,26 +651,29 @@ for p = 1:dm(3)
             % semi-quantitative T1
             R1 = (((T1w * (fa_t1w_rad / 2 / TR_t1w)) - (PDw * fa_pdw_rad / 2 / TR_pdw)) ./ ...
                 max(((PDw / fa_pdw_rad) - (T1w / fa_t1w_rad)),eps))*10^6;
-        else
+        else 
             % Transmit bias corrected quantitative T1 values
             % correct T1 for transmit bias f_T with fa_true = f_T * fa_nom
             % T1corr = T1 / f_T / f_T
             
-            if ISC.enabled
+            if ISC.enabled %NC Modified
                 % MFC: We do have P2_a and P2_b parameters for this sequence
                 % => T1 = A(B1) + B(B1)*T1app (see Preibisch 2009)
                 T1 = ISC.P2_a(1)*f_T.^2 + ...
                     ISC.P2_a(2)*f_T + ...
                     ISC.P2_a(3) + ...
                     (ISC.P2_b(1)*f_T.^2+ISC.P2_b(2)*f_T+ISC.P2_b(3)) .* ...
-                    ((((PDw / fa_pdw_rad) - (T1w / fa_t1w_rad)+eps) ./ ...
-                    max((T1w * fa_t1w_rad / 2 / TR_t1w) - (PDw * fa_pdw_rad / 2 / TR_pdw),eps))./f_T.^2);
+                    ((((PDw ./ (fa_pdw_rad*f_T)) - (T1w ./ (fa_t1w_rad*f_T2))+eps) ./ ...
+                    max((T1w .* (f_T2*fa_t1w_rad) / 2 / TR_t1w) - (PDw .* (f_T*fa_pdw_rad) / 2 / TR_pdw),eps)));
             else
                 % MFC: We do not have P2_a or P2_b parameters for this sequence
                 % => T1 = T1app
                 T1 = ((((PDw / fa_pdw_rad) - (T1w / fa_t1w_rad)+eps) ./ ...
                     max((T1w * fa_t1w_rad / 2 / TR_t1w) - (PDw * fa_pdw_rad / 2 / TR_pdw),eps))./f_T.^2);
             end
+            
+         
+                
             
             R1 = 1./T1*10^6;
         end
@@ -698,6 +720,8 @@ for p = 1:dm(3)
     else
         f_T = [];
     end
+    
+
     
     % PDw images are always available, so this bit is always loaded:
     PDw = spm_slice_vol(Vavg(PDwidx),Vavg(PDwidx).mat\M,dm(1:2),mpm_params.interp);

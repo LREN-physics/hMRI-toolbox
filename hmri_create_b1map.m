@@ -31,6 +31,7 @@ spm_jsonwrite(fullfile(jobsubj.path.supplpath,'hMRI_map_creation_b1map_params.js
 
 % init output
 P_trans = [];
+P2_trans=[]; %NC
 
 % return if nothing else to be done (no B1 correction or UNICORT cases)
 if ~b1map_params.b1avail
@@ -72,7 +73,7 @@ switch(b1map_params.b1type)
             b1map_params.b1input = char(b1map_params.b1input(1,:), rescaled_fnam);
         end
         P_trans  = b1map_params.b1input(1:2,:);
-        
+        P2_trans = b1map_params.b1input2(1:2,:); %NC
     otherwise 
         hmri_log(sprintf('WARNING: unknown B1 type, no B1 map calculation performed.'),b1map_params.defflags);
        

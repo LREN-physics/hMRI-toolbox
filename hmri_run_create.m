@@ -128,6 +128,7 @@ end
 
 % run hmri_create_MTProt to evaluate the parameter maps
 job.subj.b1_trans_input = P_trans;
+job.subj.b1_trans_input2 = P2_trans; %NC
 [fR1, fR2s, fMT, fA, PPDw, PT1w, PMTw]  = hmri_create_MTProt(job.subj);
 
 % collect outputs:
