@@ -36,6 +36,57 @@ lambda.num     = [1 Inf];
 lambda.help    = {['Specify the powers of the MDI to include in the dictionary.',... 
     'Vector of integers is expected. By default, a power of 0 is used,'... 
     'equivalent to the OLS case ']};
+
+% ---------------------------------------------------------------------
+% MDI json files
+% ---------------------------------------------------------------------
+MDIfname        = cfg_files;
+MDIfname.tag     = 'filename';
+MDIfname.name    = 'filename';
+MDIfname.help    = {'Select a list of json files containing the quality assessment  of the qMRI maps (one file per participant) '};
+MDIfname.ufilter = '^hMRI_map_creation_quality_assessment.json$';
+MDIfname.num     = [1 Inf];
+
+%----------------------------------------------------------------------
+% MDI to be selected from the json file 
+% ---------------------------------------------------------------------
+
+MTw        = cfg_menu;
+MTw.tag    = 'MTw';
+MTw.name   = 'MTw';
+MTw.help   = {'MDI from MTw images'};
+MTw.labels = {'yes' 'no'};
+MTw.values = {true false};
+MTw.val = {false};
+
+T1w        = cfg_menu;
+T1w.tag    = 'T1w';
+T1w.name   = 'T1w';
+T1w.help   = {'MDI from T1w images'};
+T1w.labels = {'yes' 'no'};
+T1w.values = {true false};
+T1w.val = {false};
+
+
+PDw        = cfg_menu;
+PDw.tag    = 'PDw';
+PDw.name   = 'PDw';
+PDw.help   = {'MDI from PDw images'};
+PDw.labels = {'yes' 'no'};
+PDw.values = {true false};
+PDw.val = {true};
+
+%----------------------------------------------------------------------
+% Data Type
+% ---------------------------------------------------------------------
+MDISource = cfg_branch;
+MDISource.tag     = 'MDIsource';
+MDISource.name    = 'MDI source';
+MDISource.help    = {'Use MDI obtained from PD weighted images, T1 weighted',...
+    'images, MT weighted image or a combination '}; 
+MDISource.val = {PDw T1w MTw};
+
+
 % ---------------------------------------------------------------------
 % MDI values 
 % ---------------------------------------------------------------------
@@ -46,10 +97,43 @@ MDIvalues.val     = {[ones(10,1) 2*ones(10,1)]};
 MDIvalues.strtype = 'e';
 MDIvalues.num     = [Inf Inf];
 MDIvalues.help    = {['Specify the Motion Degradation Index ',...
-    'for each participant (one line per participant). Several columns',...
+    'for each participant (one line per participant). Several columns ',...
     'can be used if several MDI are available (For example, T1 maps have ',...
     '2 MDI available for each participant , one from the PDw images and ',...
     'another one from the T1w images']};
+
+
+%----------------------------------------------------------------------
+% MDI json file
+% ---------------------------------------------------------------------
+
+MDIjson          = cfg_branch;
+MDIjson.tag       = 'MDIjsonfile';
+MDIjson.name      = 'MDI jsonfile';
+MDIjson.help      = {'For this type, the user will provide a list of json file'};
+MDIjson.val       = {MDIfname MDISource};
+
+%----------------------------------------------------------------------
+% MDI matrix type
+% ---------------------------------------------------------------------
+
+MDImatrix           = cfg_branch;
+MDImatrix.tag       = 'MDImatrix';
+MDImatrix.name      = 'MDI matrix';
+MDImatrix.help      = {'For this type, the user will provide a matrix of MDI'};
+MDImatrix.val       = {MDIvalues};
+
+
+%----------------------------------------------------------------------
+% MDI type
+% ---------------------------------------------------------------------
+MDItype = cfg_choice;
+MDItype.tag     = 'MDItype';
+MDItype.name    = 'MDI type';
+MDItype.help    = {'Type of MDI data. The user can provide a matrix of MDI',...
+    'values or provide a list of json files containing the information'}; 
+MDItype.values  = {MDImatrix MDIjson };
+MDItype.val     = {MDImatrix};
 
 % ---------------------------------------------------------------------
 % Compute dictionnary of covariance matrices based on the otion degradation
@@ -59,7 +143,7 @@ MDIvalues.help    = {['Specify the Motion Degradation Index ',...
 quiqi         = cfg_exbranch;
 quiqi.tag     = 'quiqi';
 quiqi.name    = 'QUIQI';
-quiqi.val     = { spm_mat_file lambda MDIvalues };
+quiqi.val     = { spm_mat_file lambda MDItype};
 quiqi.help    = {'Given the MDI index of each participant, a dictionary of'...
     'covariance matrices is built and stored in SPM.xVi.Vi. this dictionary',...
     'will be used subsequently by spm_reml.m or spm_reml_sc.m to account for',...

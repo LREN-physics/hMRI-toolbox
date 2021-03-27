@@ -20,11 +20,54 @@ hmri_log(sprintf('\t--- Build dictionary of covariance matrices based on the MDI
 spm_mat_file      =   job.spm_mat_file;
 load(spm_mat_file{1});
 
-% vector of MDI 
-MDIvalues      =   job.MDIvalues;
+% get MDI values
+MDItype        =   job.MDItype;
 
-if size(MDIvalues,1)~= size (SPM.xX.X,1)
-    error('The length of MDI values is different from the number of lines in the design matrix')
+if isfield(MDItype,'MDIjsonfile')
+    ListFile=MDItype.MDIjsonfile.filename;
+    
+    if length(ListFile)~= size (SPM.xX.X,1)
+        error('The number of json file is different from the number of lines in the design matrix')
+    end
+    
+    
+    MDIsource= MDItype.MDIjsonfile.MDIsource;
+    for f=1:length(ListFile)
+        QAdata=spm_jsonread(ListFile{f});
+        col=0;
+        if (MDIsource.PDw)
+            if isfield(QAdata.SDR2s,'PDw')
+                col=col+1;
+                MDIvalues(f,col)=QAdata.SDR2s.PDw;
+            else
+                error('There is no MDI value from PDw data')
+            end
+        end
+        if (MDIsource.T1w)
+            if isfield(QAdata.SDR2s,'T1w')
+                col=col+1;
+                MDIvalues(f,col)=QAdata.SDR2s.T1w;
+            else
+                error('There is no MDI value from T1w data')
+            end
+        end
+        if (MDIsource.MTw)
+            if isfield(QAdata.SDR2s,'MTw')
+                col=col+1;
+                MDIvalues(f,col)=QAdata.SDR2s.MTw;
+            else
+                error('There is no MDI value from MTw data')
+            end
+        end
+    end
+    
+    
+else
+    MDIvalues      =   job.MDItype.MDImatrix.MDIvalues;
+    
+    if size(MDIvalues,1)~= size (SPM.xX.X,1)
+        error('The number of lines in the MDI matrix is different from the number of lines in the design matrix')
+    end
 end
 
 
@@ -34,38 +77,49 @@ lambda = job.lambda;
 %% ***********************************************%%
 % create vectors of MDI to the power of lambda
 % ************************************************%%
-MatCovDict=[]; 
+MatCovDict=[];
 for indMDI= 1:size(MDIvalues,2)
     for indLam=1:size(lambda,2)
         MatCovDict=cat(2,MatCovDict,MDIvalues(:,indMDI).^lambda(indLam));
     end
 end
-                    
+
 
 %% ***********************************************%%
-% Check if a dictionary is already present. 
+% Check if a dictionary is already present.
 % One will exist if a group comparison has been specified
 %*************************************************%%
 
-if isfield(SPM.xVi,'Vi')% Group comparison
-    GroupIndx={};DataSize=size(SPM.xVi.Vi{1},1);
-    for ctr=1:size(SPM.xVi.Vi,2)
-        GroupIndx{ctr}=find(diag(SPM.xVi.Vi{ctr})~=0);
+if isfield(SPM.xVi,'Vi')
+    % check if it is a group comparison
+    nVi=size(SPM.xVi.Vi);
+    for v=1:nVi
+        len(v)=length(find(diag(SPM.xVi.Vi{v})~=0));
     end
-else
+    if length(unique(len))>1 % This is a group comparison 
+        [Uni inda indc]=unique(len);
+        GroupIndx={};DataSize=size(SPM.xVi.V,1);
+        for ctr=1:length(unique(len))
+            GroupIndx{ctr}=find(diag(SPM.xVi.Vi{inda(ctr)})~=0);
+        end
+    else % This is not a group comparison 
+        DataSize=size(SPM.xVi.V,1);
+        GroupIndx{1}=find(diag(SPM.xVi.V)~=0);
+    end
+else % this is not a group comparison 
     DataSize=size(SPM.xVi.V,1);
     GroupIndx{1}=find(diag(SPM.xVi.V)~=0);
 end
-%SPM=rmfield(SPM,'xVi');
+SPM=rmfield(SPM,'xVi');
 
 
 %% ***********************************************%%
 % Create dictionary of covariance matrices and
-% store them in SPM.xVi.Vi
+% store it in SPM.xVi.Vi
 %*************************************************%%
 ind=0;
 for indGroup=1:size(GroupIndx,2)% separate basis function for each power of the MDI AND group
-    for indMat=1:length(MatCovDict)
+    for indMat=1:size(MatCovDict,2)
         ind=ind+1;
         DiagTerms=zeros(length(MDIvalues),1);
         DiagTerms(GroupIndx{indGroup},1)=MatCovDict(GroupIndx{indGroup},indMat);
@@ -73,6 +127,11 @@ for indGroup=1:size(GroupIndx,2)% separate basis function for each power of the 
     end
 end
 
-save(fullfile(CurrentDir,'SPM.mat'), 'SPM')
+
+%% ***********************************************%%
+% Save the changes in SPM.mat
+%*************************************************%%
+[pn fn]= fileparts(spm_mat_file{1});
+save(fullfile(pn,'SPM.mat'), 'SPM')
 
 end
