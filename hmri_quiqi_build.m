@@ -1,4 +1,4 @@
-function hmri_quiqi(job)
+function hmri_quiqi_build(job)
 %==========================================================================
 %
 % PURPOSE: Compute dictionaries of covariance matrices from the motion
@@ -9,6 +9,10 @@ function hmri_quiqi(job)
 %
 % METHODS: SPM.mat created when designing the model is modified to add in
 % SPM.xVi.Vi the dictionary of covariance matrices.
+%_______________________________________________________________________
+% Nad?ge Corbin
+% 2021.03.30
+% Centre de R?sonance Magn?tique des Syst?mes Biologiques, Bordeaux, France
 %==========================================================================
 
 hmri_log(sprintf('\t--- Build dictionary of covariance matrices based on the MDI ---'));
@@ -127,6 +131,11 @@ for indGroup=1:size(GroupIndx,2)% separate basis function for each power of the 
     end
 end
 
+
+%% ***********************************************%%
+% Add MDI vaalues to the SPM structure
+%*************************************************%%
+SPM.QUIQI_MDI=MDIvalues; 
 
 %% ***********************************************%%
 % Save the changes in SPM.mat
