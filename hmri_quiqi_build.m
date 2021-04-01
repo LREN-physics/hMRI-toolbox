@@ -10,7 +10,11 @@ function hmri_quiqi_build(job)
 % METHODS: SPM.mat created when designing the model is modified to add in
 % SPM.xVi.Vi the dictionary of covariance matrices.
 %_______________________________________________________________________
-% Nad?ge Corbin
+% Antoine Lutti
+% 2021.04.01
+% Neuroimaging Research Laboratory, Lausanne University Hospital &
+% University of Lausanne, Lausanne, Switzerland
+% Nadège Corbin
 % 2021.03.30
 % Centre de R?sonance Magn?tique des Syst?mes Biologiques, Bordeaux, France
 %==========================================================================
