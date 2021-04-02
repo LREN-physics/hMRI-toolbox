@@ -108,11 +108,6 @@ function [P,Rsq,yfit]=myPolyFit(X,Y,Powers,FitMethod)
 %     - Rsq: R-square of the fit
 %     - yfit: fitted dependent variable
 %
-%__________________________________________________________________________
-% Copyright (C) 2021 Laboratory for Neuroimaging Research
-% Written by A. Lutti, 2021.
-% Laboratory for Neuroimaging Research, Lausanne University Hospital, Switzerland
-
 Powers=linspace(0,Powers,Powers+1);
 P=zeros(size(Powers,2),size(Y,2));
 Rsq=zeros(1,size(Y,2));
@@ -141,11 +136,6 @@ end
 function plotLinFit(X,Y,yfit,P,Powers,Rsq,xlabl,ylabl,SavePath)
 % Plots data and their polynomial fits. Figure title includes polynomial
 % coefficients and r-square
-%
-%__________________________________________________________________________
-% Copyright (C) 2021 Laboratory for Neuroimaging Research
-% Written by A. Lutti, 2021.
-% Laboratory for Neuroimaging Research, Lausanne University Hospital, Switzerland
 
 base=10;
 figure

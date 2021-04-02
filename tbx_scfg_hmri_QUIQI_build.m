@@ -45,7 +45,7 @@ MDIfname        = cfg_files;
 MDIfname.tag     = 'filename';
 MDIfname.name    = 'filename';
 MDIfname.help    = {'Select a list of json files containing the quality assessment  of the qMRI maps (one file per participant) '};
-MDIfname.ufilter = '^hMRI_map_creation_quality_assessment.json$';
+MDIfname.ufilter = 'hMRI_map_creation_quality_assessment.json$';
 MDIfname.num     = [1 Inf];
 
 %----------------------------------------------------------------------
