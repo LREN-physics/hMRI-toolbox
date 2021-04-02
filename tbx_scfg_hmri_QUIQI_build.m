@@ -30,7 +30,7 @@ spm_mat_file.num     = [1 1];
 % ---------------------------------------------------------------------
 lambda        = cfg_entry;
 lambda.tag     = 'lambda';
-lambda.name    = 'MDI power ';
+lambda.name    = 'MDI powers ';
 lambda.val     = {[0]};
 lambda.strtype = 'e';
 lambda.num     = [1 Inf];

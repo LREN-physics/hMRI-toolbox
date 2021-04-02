@@ -10,6 +10,10 @@ function hmri_quiqi_build(job)
 % METHODS: SPM.mat created when designing the model is modified to add in
 % SPM.xVi.Vi the dictionary of covariance matrices.
 %_______________________________________________________________________
+% Antoine Lutti
+% 2021.04.01
+% Neuroimaging Research Laboratory, Lausanne University Hospital &
+% University of Lausanne, Lausanne, Switzerland
 % Nad?ge Corbin
 % 2021.03.30
 % Centre de R?sonance Magn?tique des Syst?mes Biologiques, Bordeaux, France
@@ -96,6 +100,7 @@ end
 
 if isfield(SPM.xVi,'Vi')
     % check if it is a group comparison
+
 %     nVi=size(SPM.xVi.Vi);
     nVi=size(SPM.xVi.Vi,2);%AL change
     for v=1:nVi
@@ -103,6 +108,7 @@ if isfield(SPM.xVi,'Vi')
     end
 %     if length(unique(len))>1 % This is a group comparison 
     if length(unique(len))>1 || unique(len)==size(SPM.xVi.Vi{1},1)/2 % This is a group comparison %AL change
+
         [Uni inda indc]=unique(len);
         GroupIndx={};
         for ctr=1:length(unique(len))

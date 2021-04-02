@@ -9,6 +9,10 @@ function hmri_quiqi_check(job)
 % with respect to their corresponfing MDI value
 %
 %_______________________________________________________________________
+% Antoine Lutti
+% 2021.04.01
+% Neuroimaging Research Laboratory, Lausanne University Hospital &
+% University of Lausanne, Lausanne, Switzerland
 % Nad?ge Corbin
 % 2021.03.30
 % Centre de R?sonance Magn?tique des Syst?mes Biologiques, Bordeaux, France
@@ -84,6 +88,7 @@ for type=1:size(MDIVals,2)
     [P,Rsq,yfit]=myPolyFit(MDIVals(:,type),Res,pow,'Free');%AL change
 %     plotLinFit(MDIVals(:,type),Res',yfit,P,pow,Rsq,['MDI (s^-^1) - Type ' num2str(type)],'Residuals (Var)')%AL change
     plotLinFit(MDIVals(:,type),Res',yfit,P,pow,Rsq,['MDI (s^-^1) - Type ' num2str(type)],'Residuals (Var)',SPM.swd)%AL change
+
 end
 
 end
