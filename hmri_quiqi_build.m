@@ -96,22 +96,22 @@ end
 
 if isfield(SPM.xVi,'Vi')
     % check if it is a group comparison
-    nVi=size(SPM.xVi.Vi);
+%     nVi=size(SPM.xVi.Vi);
+    nVi=size(SPM.xVi.Vi,2);%AL change
     for v=1:nVi
         len(v)=length(find(diag(SPM.xVi.Vi{v})~=0));
     end
-    if length(unique(len))>1 % This is a group comparison 
+%     if length(unique(len))>1 % This is a group comparison 
+    if length(unique(len))>1 || unique(len)==size(SPM.xVi.Vi{1},1)/2 % This is a group comparison %AL change
         [Uni inda indc]=unique(len);
-        GroupIndx={};DataSize=size(SPM.xVi.V,1);
+        GroupIndx={};
         for ctr=1:length(unique(len))
             GroupIndx{ctr}=find(diag(SPM.xVi.Vi{inda(ctr)})~=0);
         end
     else % This is not a group comparison 
-        DataSize=size(SPM.xVi.V,1);
         GroupIndx{1}=find(diag(SPM.xVi.V)~=0);
     end
 else % this is not a group comparison 
-    DataSize=size(SPM.xVi.V,1);
     GroupIndx{1}=find(diag(SPM.xVi.V)~=0);
 end
 SPM=rmfield(SPM,'xVi');

@@ -11,7 +11,7 @@ function hmri_quiqi_check(job)
 %_______________________________________________________________________
 % Nad?ge Corbin
 % 2021.03.30
-% Centre de Resonance Magnetique des Syst?mes Biologiques, Bordeaux, France
+% Centre de R?sonance Magn?tique des Syst?mes Biologiques, Bordeaux, France
 %==========================================================================
 
 hmri_log(sprintf('\t--- Evaluate residuals and MDI relationship ---'));
@@ -80,8 +80,10 @@ end
 
 for type=1:size(MDIVals,2)
     Res=ResidVar*1e6;
-    [P,Rsq,yfit]=myPolyFit(MDIVals(:,type),Res,pow,'NonNeg');
-    plotLinFit(MDIVals(:,type),Res',yfit,P,pow,Rsq,['MDI (s^-^1) - Type ' num2str(type)],'Residuals (Var)')
+%     [P,Rsq,yfit]=myPolyFit(MDIVals(:,type),Res,pow,'NonNeg');%AL change
+    [P,Rsq,yfit]=myPolyFit(MDIVals(:,type),Res,pow,'Free');%AL change
+%     plotLinFit(MDIVals(:,type),Res',yfit,P,pow,Rsq,['MDI (s^-^1) - Type ' num2str(type)],'Residuals (Var)')%AL change
+    plotLinFit(MDIVals(:,type),Res',yfit,P,pow,Rsq,['MDI (s^-^1) - Type ' num2str(type)],'Residuals (Var)',SPM.swd)%AL change
 end
 
 end
@@ -131,7 +133,7 @@ end
 end
 
 
-function plotLinFit(X,Y,yfit,P,Powers,Rsq,xlabl,ylabl)
+function plotLinFit(X,Y,yfit,P,Powers,Rsq,xlabl,ylabl,SavePath)
 % Plots data and their polynomial fits. Figure title includes polynomial
 % coefficients and r-square
 %
@@ -172,5 +174,5 @@ end
 Str1=[Str1,') = '];Str2=[Str2,')'];
 title([Str1 Str2 '; R^2 = ' num2str(round(Rsq*1e2)/1e2)])
 ylabel(ylabl);xlabel(xlabl);
-
+saveas(gcf, fullfile(SavePath,'MDIvsRes'), 'fig');
 end
