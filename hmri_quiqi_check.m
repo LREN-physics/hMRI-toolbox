@@ -81,16 +81,10 @@ end
 %% ***********************************************%%
 % Fit of the residuals with respect to MDI
 %*************************************************%%
-
-for type=1:size(MDIVals,2)
-    Res=ResidVar*1e6;
-%     [P,Rsq,yfit]=myPolyFit(MDIVals(:,type),Res,pow,'NonNeg');%AL change
-    [P,Rsq,yfit]=myPolyFit(MDIVals(:,type),Res,pow,'Free');%AL change
-%     plotLinFit(MDIVals(:,type),Res',yfit,P,pow,Rsq,['MDI (s^-^1) - Type ' num2str(type)],'Residuals (Var)')%AL change
-    plotLinFit(MDIVals(:,type),Res',yfit,P,pow,Rsq,['MDI (s^-^1) - Type ' num2str(type)],'Residuals (Var)',SPM.swd)%AL change
-
-end
-
+ResidVar=ResidVar*1e6;
+[~,Rsq,yfit]=myPolyFit(MDIVals,ResidVar,pow,'Free');
+plotResFit(ResidVar,yfit,Rsq,50,SPM.swd)
+    
 end
 
 function [P,Rsq,yfit]=myPolyFit(X,Y,Powers,FitMethod)
@@ -109,65 +103,39 @@ function [P,Rsq,yfit]=myPolyFit(X,Y,Powers,FitMethod)
 %     - yfit: fitted dependent variable
 %
 Powers=linspace(0,Powers,Powers+1);
-P=zeros(size(Powers,2),size(Y,2));
-Rsq=zeros(1,size(Y,2));
-for ctr=1:size(Y,2)
-    Ytemp=squeeze(Y(:,ctr));
-    if strcmp(FitMethod,'NonNeg')
-        Xmat=[];
-        for ctr2=1:size(Powers,2)
-            Xmat=cat(2,Xmat,X.^Powers(ctr2));
-        end
-        P(:,ctr) = lsqnonneg(Xmat,Ytemp);
-        yfit =Xmat* P(:,ctr); %polyval(P(:,ctr),X);%yfit=P(1)*R2sArray+P(2)
-    elseif strcmp(FitMethod,'Free')
-        P(:,ctr)=polyfit(X,Ytemp,max(Powers));
-        yfit =polyval(P(:,ctr),X);%yfit=P(1)*R2sArray+P(2)
-        P(:,ctr)=P(end:-1:1,ctr)';%consistently with 'NonNeg', P is sorted in increasing powers of the model
-    end
-    SSresid = sum((Ytemp - yfit).^2);
-    SStotal = (length(Ytemp)-1) * var(Ytemp);
-    Rsq(ctr) = 1 - SSresid/SStotal;%     Slope = P(1)
-end
-
-end
-
-
-function plotLinFit(X,Y,yfit,P,Powers,Rsq,xlabl,ylabl,SavePath)
-% Plots data and their polynomial fits. Figure title includes polynomial
-% coefficients and r-square
-
-base=10;
-figure
-plot(X,Y,'.')
-hold
-plot(sort(X),sort(yfit),'m')
-Powers=linspace(0,Powers,Powers+1);
-
-ctr=1;
-Str1=['(\alpha_' num2str(Powers(ctr))];
-if P(ctr)~=0
-    RoundingStr=['1e' num2str(-floor(log(abs(P(ctr)))./log(base))+1)];
-    DisplayStr1=['1e' num2str(-floor(log(abs(P(ctr)))./log(base)))];
-    DisplayStr2=['e' num2str(floor(log(abs(P(ctr)))./log(base)))];
-    Str2=['(' num2str(round(P(ctr)*eval(RoundingStr))/eval(RoundingStr)*eval(DisplayStr1)) DisplayStr2];
-else
-    Str2=['(' num2str(0)];
-
-end
-for ctr=2:size(Powers,2)% (size(P,1)-1):-1:1
-    Str1=[Str1,[', \alpha_' num2str(Powers(ctr))]];
-    if P(ctr)~=0
-        RoundingStr=['1e' num2str(-floor(log(abs(P(ctr)))./log(base))+1)];
-        DisplayStr1=['1e' num2str(-floor(log(abs(P(ctr)))./log(base)))];
-        DisplayStr2=['e' num2str(floor(log(abs(P(ctr)))./log(base)))];
-        Str2=[Str2,[', ' num2str(round(P(ctr)*eval(RoundingStr))/eval(RoundingStr)*eval(DisplayStr1)) DisplayStr2]];
+Xmat=[];
+for ctr2=1:size(Powers,2)
+    if Powers(ctr2)==0
+        Xmat=cat(2,Xmat,ones(size(X,1),1));
     else
-        Str2=[Str2,', ' num2str(0)];
+        Xmat=cat(2,Xmat,X.^Powers(ctr2));
     end
 end
-Str1=[Str1,') = '];Str2=[Str2,')'];
-title([Str1 Str2 '; R^2 = ' num2str(round(Rsq*1e2)/1e2)])
-ylabel(ylabl);xlabel(xlabl);
-saveas(gcf, fullfile(SavePath,'MDIvsRes'), 'fig');
+if strcmp(FitMethod,'NonNeg')
+    P = lsqnonneg(Xmat,Y);
+elseif strcmp(FitMethod,'Free')
+    P=pinv(Xmat'*Xmat)*Xmat'*Y;
+end
+yfit =Xmat * P;
+SSresid = sum((Y - yfit).^2);
+SStotal = (length(Y)-1) * var(Y);
+Rsq = 1 - SSresid/SStotal;
+
+end
+
+
+function plotResFit(Y,yfit,Rsq,Nbins,SavePath)
+% Plots residuals against the fit of the residuals with a polynominal
+% function of the MDI
+
+figure
+[N1, c] = hist3(cat(2,Y,yfit),{linspace(min(min(Y),min(yfit)),max(max(Y),max(yfit)),Nbins) linspace(min(min(Y),min(yfit)),max(max(Y),max(yfit)),Nbins) },'CdataMode','auto');
+h=pcolor(c{1}, c{2}, N1');set(h, 'EdgeColor', 'none');
+colorbar;view(2)
+hold on
+plot(Y,Y,'r','Linewidth',2)%for reference
+title(['R^2 = ' num2str(round(Rsq*1e2)/1e2)])
+ylabel('Residual fit');xlabel('Residuals');
+saveas(gcf, fullfile(SavePath,'ResFitvsRes'), 'fig');
+
 end
