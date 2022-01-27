@@ -81,9 +81,9 @@ end
 %% ***********************************************%%
 % Fit of the residuals with respect to MDI
 %*************************************************%%
-ResidVar=ResidVar*1e6;
+% ResidVar=ResidVar*1e6;% for R2s maps in ms-1 only
 [~,Rsq,yfit]=myPolyFit(MDIVals,ResidVar,pow,'Free');
-plotResFit(ResidVar,yfit,Rsq,50,SPM.swd)
+plotResFit(ResidVar,yfit,Rsq,40,SPM.swd)
     
 end
 
